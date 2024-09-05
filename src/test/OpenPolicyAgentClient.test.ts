@@ -1,19 +1,27 @@
-import tap from 'tap'
-import { OpenPolicyAgentClient } from '../src'
+import { beforeEach, test } from 'node:test'
+import {
+  deepStrictEqual,
+  doesNotThrow,
+  throws,
+  rejects,
+  doesNotReject,
+} from 'node:assert'
+
+import { OpenPolicyAgentClient } from '../lib'
 import { MockAgent, setGlobalDispatcher } from 'undici'
 import { Interceptable } from 'undici/types/mock-interceptor'
 import { LRUCache } from 'lru-cache'
-import { OpaClientServerError } from '../src/errors/opaClientServerError'
-import { OpaClientBadRequestError } from '../src/errors/opaClientBadRequestError'
-import { OpaClientNotFoundError } from '../src/errors/opaClientNotFoundError'
-import { OpaClientUnknownError } from '../src/errors/opaClientUnknownError'
+import { OpaClientServerError } from '../lib/errors/opaClientServerError'
+import { OpaClientBadRequestError } from '../lib/errors/opaClientBadRequestError'
+import { OpaClientNotFoundError } from '../lib/errors/opaClientNotFoundError'
+import { OpaClientUnknownError } from '../lib/errors/opaClientUnknownError'
 
 const opaUrl = 'https://opa.test'
 
 let agent: MockAgent
 let opaInterceptor: Interceptable
 
-tap.beforeEach(() => {
+beforeEach(() => {
   agent = new MockAgent()
   agent.disableNetConnect()
   setGlobalDispatcher(agent)
@@ -21,8 +29,8 @@ tap.beforeEach(() => {
   opaInterceptor = agent.get(opaUrl)
 })
 
-tap.test('constructor', async (t) => {
-  t.test('should use opaVersion specified', async (t) => {
+test('constructor', async (t) => {
+  await t.test('should use opaVersion specified', async () => {
     opaInterceptor
       .intercept({
         path: '/v2/data/my/resource/allow',
@@ -39,19 +47,19 @@ tap.test('constructor', async (t) => {
 
     const queryResult = await opaClient.query('my.resource.allow')
 
-    t.same(
+    deepStrictEqual(
       queryResult,
       { result: true },
       'query response should match expected'
     )
 
-    t.doesNotThrow(
+    doesNotThrow(
       () => agent.assertNoPendingInterceptors(),
       'all request interceptors should have been called'
     )
   })
 
-  t.test('should use method specified', async (t) => {
+  await t.test('should use method specified', async () => {
     opaInterceptor
       .intercept({
         path: '/v1/data/my/resource/allow',
@@ -68,21 +76,21 @@ tap.test('constructor', async (t) => {
 
     const queryResult = await opaClient.query('my.resource.allow')
 
-    t.same(
+    deepStrictEqual(
       queryResult,
       { result: true },
       'query response should match expected'
     )
 
-    t.doesNotThrow(
+    doesNotThrow(
       () => agent.assertNoPendingInterceptors(),
       'all request interceptors should have been called'
     )
   })
 })
 
-tap.test('query function', async (t) => {
-  t.test('should query requested resource', async (t) => {
+test('query function', async (t) => {
+  await t.test('should query requested resource', async () => {
     opaInterceptor
       .intercept({
         path: '/v1/data/my/resource/allow',
@@ -96,26 +104,26 @@ tap.test('query function', async (t) => {
 
     const queryResult = await opaClient.query('my.resource.allow')
 
-    t.same(
+    deepStrictEqual(
       queryResult,
       { result: true },
       'query response should match expected'
     )
 
-    t.doesNotThrow(
+    doesNotThrow(
       () => agent.assertNoPendingInterceptors(),
       'all request interceptors should have been called'
     )
   })
 
-  t.test('should query requested resource with payload', async (t) => {
+  await t.test('should query requested resource with payload', async () => {
     opaInterceptor
       .intercept({
         path: '/v1/data/my/resource/allow',
         method: 'POST',
       })
       .reply((req) => {
-        t.same(
+        deepStrictEqual(
           JSON.parse(req.body as string),
           {
             input: { test: 'data' },
@@ -137,19 +145,19 @@ tap.test('query function', async (t) => {
       test: 'data',
     })
 
-    t.same(
+    deepStrictEqual(
       queryResult,
       { result: true },
       'query response should match expected'
     )
 
-    t.doesNotThrow(
+    doesNotThrow(
       () => agent.assertNoPendingInterceptors(),
       'all request interceptors should have been called'
     )
   })
 
-  t.test('should query cached requested resource', async (t) => {
+  await t.test('should query cached requested resource', async () => {
     opaInterceptor
       .intercept({
         path: '/v1/data/my/resource/allow',
@@ -176,28 +184,28 @@ tap.test('query function', async (t) => {
     })
 
     const queryResult = await opaClient.query('my.resource.allow')
-    t.same(
+    deepStrictEqual(
       queryResult,
       { result: true },
       'query response should match expected'
     )
 
     const cachedQueryResult = await opaClient.query('my.resource.allow')
-    t.same(
+    deepStrictEqual(
       cachedQueryResult,
       { result: true },
       'cached query response should match expected'
     )
 
-    t.throws(
+    throws(
       () => agent.assertNoPendingInterceptors(),
       'all request interceptors should not have been called'
     )
   })
 
-  t.test(
+  await t.test(
     'should query cached requested resource twice due to cache clear',
-    async (t) => {
+    async () => {
       opaInterceptor
         .intercept({
           path: '/v1/data/my/resource/allow',
@@ -224,7 +232,7 @@ tap.test('query function', async (t) => {
       })
 
       const queryResult1 = await opaClient.query('my.resource.allow')
-      t.same(
+      deepStrictEqual(
         queryResult1,
         { result: true },
         'query response should match expected'
@@ -233,78 +241,84 @@ tap.test('query function', async (t) => {
       opaClient.cache?.clear()
 
       const queryResult2 = await opaClient.query('my.resource.allow')
-      t.same(
+      deepStrictEqual(
         queryResult2,
         { result: true },
         'cached query response should match expected'
       )
 
-      t.doesNotThrow(
+      doesNotThrow(
         () => agent.assertNoPendingInterceptors(),
         'all request interceptors should have been called'
       )
     }
   )
 
-  t.test('should throw when the server returns 500 status code', async (t) => {
-    opaInterceptor
-      .intercept({
-        path: '/v1/data/my/resource/allow',
-        method: 'POST',
-      })
-      .reply(500, {
-        error: true,
-      })
+  await t.test(
+    'should throw when the server returns 500 status code',
+    async () => {
+      opaInterceptor
+        .intercept({
+          path: '/v1/data/my/resource/allow',
+          method: 'POST',
+        })
+        .reply(500, {
+          error: true,
+        })
 
-    const opaClient = new OpenPolicyAgentClient(opaUrl)
+      const opaClient = new OpenPolicyAgentClient(opaUrl)
 
-    t.rejects(
-      () => opaClient.query('my.resource.allow'),
-      new OpaClientServerError('my.resource.allow', undefined),
-      'should throw when the server returns 500 status code'
-    )
+      rejects(
+        () => opaClient.query('my.resource.allow'),
+        new OpaClientServerError('my.resource.allow', undefined),
+        'should throw when the server returns 500 status code'
+      )
 
-    t.doesNotThrow(
-      () => agent.assertNoPendingInterceptors(),
-      'all request interceptors should have been called'
-    )
-  })
+      doesNotThrow(
+        () => agent.assertNoPendingInterceptors(),
+        'all request interceptors should have been called'
+      )
+    }
+  )
 
-  t.test('should throw when the server returns 400 status code', async (t) => {
-    opaInterceptor
-      .intercept({
-        path: '/v1/data/my/resource/allow',
-        method: 'POST',
-      })
-      .reply(400, {
-        warning: {
-          code: 'invalid_input',
-          message: 'Invalid input',
-        },
-      })
+  await t.test(
+    'should throw when the server returns 400 status code',
+    async () => {
+      opaInterceptor
+        .intercept({
+          path: '/v1/data/my/resource/allow',
+          method: 'POST',
+        })
+        .reply(400, {
+          warning: {
+            code: 'invalid_input',
+            message: 'Invalid input',
+          },
+        })
 
-    const opaClient = new OpenPolicyAgentClient(opaUrl)
+      const opaClient = new OpenPolicyAgentClient(opaUrl)
 
-    t.rejects(
-      () => opaClient.query('my.resource.allow'),
-      new OpaClientBadRequestError('my.resource.allow', undefined, {
-        warning: {
-          code: 'invalid_input',
-          message: 'Invalid input',
-        },
-      }),
-      'should throw when the server returns 400 status code'
-    )
+      rejects(
+        () => opaClient.query('my.resource.allow'),
+        new OpaClientBadRequestError('my.resource.allow', undefined, {
+          warning: {
+            code: 'invalid_input',
+            message: 'Invalid input',
+          },
+        }),
+        'should throw when the server returns 400 status code'
+      )
 
-    t.doesNotThrow(
-      () => agent.assertNoPendingInterceptors(),
-      'all request interceptors should have been called'
-    )
-  })
+      doesNotThrow(
+        () => agent.assertNoPendingInterceptors(),
+        'all request interceptors should have been called'
+      )
+    }
+  )
 
-  t.test(
+  await t.test(
     'should throw when the server returns a status code that not match 200',
-    async (t) => {
+    async () => {
       opaInterceptor
         .intercept({
           path: '/v1/data/my/resource/allow',
@@ -314,13 +328,13 @@ tap.test('query function', async (t) => {
 
       const opaClient = new OpenPolicyAgentClient(opaUrl)
 
-      t.rejects(
+      rejects(
         () => opaClient.query('my.resource.allow'),
         new OpaClientUnknownError('my.resource.allow', 300, undefined),
         "should throw when the server returns a status code that doesn't match 200"
       )
 
-      t.doesNotThrow(
+      doesNotThrow(
         () => agent.assertNoPendingInterceptors(),
         'all request interceptors should have been called'
       )
@@ -328,8 +342,8 @@ tap.test('query function', async (t) => {
   )
 })
 
-tap.test('assert function', async (t) => {
-  t.test('should not reject when assert succeeds', async (t) => {
+test('assert function', async (t) => {
+  await t.test('should not reject when assert succeeds', async () => {
     opaInterceptor
       .intercept({
         path: '/v1/data/my/resource/allow',
@@ -341,18 +355,18 @@ tap.test('assert function', async (t) => {
 
     const opaClient = new OpenPolicyAgentClient(opaUrl)
 
-    t.resolves(
+    doesNotReject(
       () => opaClient.assert('my.resource.allow'),
       'assert should resolve'
     )
 
-    t.doesNotThrow(
+    doesNotThrow(
       () => agent.assertNoPendingInterceptors(),
       'all request interceptors should have been called'
     )
   })
 
-  t.test('should reject when assert fails', async (t) => {
+  await t.test('should reject when assert fails', async () => {
     opaInterceptor
       .intercept({
         path: '/v1/data/my/resource/allow',
@@ -364,20 +378,17 @@ tap.test('assert function', async (t) => {
 
     const opaClient = new OpenPolicyAgentClient(opaUrl)
 
-    t.rejects(
-      () => opaClient.assert('my.resource.allow'),
-      'assert should reject'
-    )
+    rejects(() => opaClient.assert('my.resource.allow'), 'assert should reject')
 
-    t.doesNotThrow(
+    doesNotThrow(
       () => agent.assertNoPendingInterceptors(),
       'all request interceptors should have been called'
     )
   })
 })
 
-tap.test('evaluatePolicy function', async (t) => {
-  t.test('should return true when policy match', async (t) => {
+test('evaluatePolicy function', async (t) => {
+  await t.test('should return true when policy match', async () => {
     opaInterceptor
       .intercept({
         path: '/v1/data/my/resource/allow',
@@ -392,19 +403,19 @@ tap.test('evaluatePolicy function', async (t) => {
     const evaluatePolicyResult =
       await opaClient.evaluatePolicy('my.resource.allow')
 
-    t.same(
+    deepStrictEqual(
       evaluatePolicyResult,
       true,
       'evaluatePolicy response should match expected'
     )
 
-    t.doesNotThrow(
+    doesNotThrow(
       () => agent.assertNoPendingInterceptors(),
       'all request interceptors should have been called'
     )
   })
 
-  t.test('should return false when policy not match', async (t) => {
+  await t.test('should return false when policy not match', async () => {
     opaInterceptor
       .intercept({
         path: '/v1/data/my/resource/allow',
@@ -419,21 +430,21 @@ tap.test('evaluatePolicy function', async (t) => {
     const evaluatePolicyResult =
       await opaClient.evaluatePolicy('my.resource.allow')
 
-    t.same(
+    deepStrictEqual(
       evaluatePolicyResult,
       false,
       'evaluatePolicy response should match expected'
     )
 
-    t.doesNotThrow(
+    doesNotThrow(
       () => agent.assertNoPendingInterceptors(),
       'all request interceptors should have been called'
     )
   })
 
-  t.test(
+  await t.test(
     'should throw when the response not contains result property',
-    async (t) => {
+    async () => {
       opaInterceptor
         .intercept({
           path: '/v1/data/my/resource/allow',
@@ -443,13 +454,13 @@ tap.test('evaluatePolicy function', async (t) => {
 
       const opaClient = new OpenPolicyAgentClient(opaUrl)
 
-      t.rejects(
+      rejects(
         () => opaClient.evaluatePolicy('my.resource.allow'),
         new OpaClientNotFoundError('my.resource.allow', undefined),
         'should throw when the response not contains result property'
       )
 
-      t.doesNotThrow(
+      doesNotThrow(
         () => agent.assertNoPendingInterceptors(),
         'all request interceptors should have been called'
       )

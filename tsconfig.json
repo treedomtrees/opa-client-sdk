@@ -1,17 +1,17 @@
 {
   "compilerOptions": {
-    "lib": ["es2022"],
-    "module": "node16",
-    "target": "es2022",
-    "strict": true,
+    "lib": ["ESNext"],
+    "target": "ES2022",
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "removeComments": true,
+    "allowJs": true,
+    "outDir": "./dist",
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node16",
-    "outDir": "lib",
-    "rootDir": "src",
-    "declaration": true
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "skipLibCheck": true,
+    "incremental": true,
+    "sourceMap": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "test"]
+  "include": ["./src/**/*"],
 }
