@@ -7,7 +7,7 @@ on:
     paths-ignore:
       - '*.md'
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -33,10 +33,3 @@ jobs:
       - name: Run tests
         run: npm test
       
-      - name: Archive artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-node${{ matrix.node-version }}
-          path: |
-            dist

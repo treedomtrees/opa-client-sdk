@@ -131,7 +131,7 @@ dist
 .pnp.*
 
 # Build folder
-lib/
+/lib
 
 # Tap
 .tap
