@@ -1,6 +1,6 @@
 {
   "name": "@treedom/opa-client-sdk",
-  "version": "3.1.2",
+  "version": "3.2.2",
   "description": "An undici-based client for Open Policy Agent",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
@@ -13,7 +13,7 @@
     "prebuild": "rm -rf lib",
     "build": "tsc --build tsconfig.build.json",
     "lint:staged": "lint-staged",
-    "lint:commit": "commitlint --edit "
+    "lint:commit": "commitlint --edit"
   },
   "repository": {
     "type": "git",

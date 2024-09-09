@@ -129,7 +129,7 @@ export class OpenPolicyAgentClient<TCache extends Cache> {
    * @throws {OpaClientBadRequestError} if the input document is invalid (ex. malformed JSON)
    * @throws {OpaClientServerError} if the server returns an error
    */
-  public async evaluatePolicy<TInput extends OpaQueryInput>(
+  public async evaluate<TInput extends OpaQueryInput>(
     resource: string,
     input?: TInput
   ) {

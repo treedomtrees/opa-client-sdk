@@ -387,7 +387,7 @@ test('assert function', async (t) => {
   })
 })
 
-test('evaluatePolicy function', async (t) => {
+test('evaluate function', async (t) => {
   await t.test('should return true when policy match', async () => {
     opaInterceptor
       .intercept({
@@ -400,13 +400,12 @@ test('evaluatePolicy function', async (t) => {
 
     const opaClient = new OpenPolicyAgentClient(opaUrl)
 
-    const evaluatePolicyResult =
-      await opaClient.evaluatePolicy('my.resource.allow')
+    const evaluateResult = await opaClient.evaluate('my.resource.allow')
 
     deepStrictEqual(
-      evaluatePolicyResult,
+      evaluateResult,
       true,
-      'evaluatePolicy response should match expected'
+      'evaluate response should match expected'
     )
 
     doesNotThrow(
@@ -427,13 +426,12 @@ test('evaluatePolicy function', async (t) => {
 
     const opaClient = new OpenPolicyAgentClient(opaUrl)
 
-    const evaluatePolicyResult =
-      await opaClient.evaluatePolicy('my.resource.allow')
+    const evaluateResult = await opaClient.evaluate('my.resource.allow')
 
     deepStrictEqual(
-      evaluatePolicyResult,
+      evaluateResult,
       false,
-      'evaluatePolicy response should match expected'
+      'evaluate response should match expected'
     )
 
     doesNotThrow(
@@ -455,7 +453,7 @@ test('evaluatePolicy function', async (t) => {
       const opaClient = new OpenPolicyAgentClient(opaUrl)
 
       rejects(
-        () => opaClient.evaluatePolicy('my.resource.allow'),
+        () => opaClient.evaluate('my.resource.allow'),
         new OpaClientNotFoundError('my.resource.allow', undefined),
         'should throw when the response not contains result property'
       )

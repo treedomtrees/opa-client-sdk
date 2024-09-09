@@ -6,6 +6,12 @@ An undici-based client for Open Policy Agent
 
 __Made with ❤️ at&nbsp;&nbsp;[<img src="https://assets.treedom.net/image/upload/manual_uploads/treedom-logo-contrib_gjrzt6.png" height="24" alt="Treedom" border="0" align="top" />](#-join-us-in-making-a-difference-)__, [join us in making a difference](#-join-us-in-making-a-difference-)!
 
+## Install
+
+```bash
+npm install @treedom/opa-client-sdk
+```
+
 ## Init
 
 ```ts
