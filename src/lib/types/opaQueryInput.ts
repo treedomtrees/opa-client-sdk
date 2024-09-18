@@ -1,5 +1,5 @@
 export type OpaQueryInput = {
-  subject: {
+  subject?: {
     id: string | number
     type?: string
   }
