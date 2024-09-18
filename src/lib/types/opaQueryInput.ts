@@ -9,5 +9,10 @@ export type OpaQueryInput = {
     type?: string
   }
 
+  headers?: {
+    authorization?: string
+    [x: string]: string
+  }
+
   [x: string]: unknown
 }
