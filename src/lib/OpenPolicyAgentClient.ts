@@ -7,11 +7,14 @@ import { OpaClientServerError } from './errors/opaClientServerError'
 import { OpaClientNotFoundError } from './errors/opaClientNotFoundError'
 import { OpaClientUnknownError } from './errors/opaClientUnknownError'
 
+export type UndiciRequestOptions = Parameters<typeof request>[1]
+
 export type OpenPolicyAgentClientProps<TCache extends Cache> = {
   url: string
   opaVersion?: string
   method?: 'POST' | 'GET'
   cache?: TCache
+  requestOptions?: UndiciRequestOptions
 }
 
 type BadRequestBody = {
@@ -24,6 +27,7 @@ type BadRequestBody = {
 export class OpenPolicyAgentClient<TCache extends Cache> {
   public readonly cache: TCache | undefined
   private readonly url: string
+  private readonly requestOptions: UndiciRequestOptions
 
   constructor(
     config: OpenPolicyAgentClientProps<TCache> | string,
@@ -44,6 +48,10 @@ export class OpenPolicyAgentClient<TCache extends Cache> {
 
       if (config.cache) {
         this.cache = config.cache
+      }
+
+      if (config.requestOptions) {
+        this.requestOptions = config.requestOptions
       }
     } else {
       this.url = config
@@ -74,6 +82,7 @@ export class OpenPolicyAgentClient<TCache extends Cache> {
     const res = await request(
       `${this.url}/${this.opaVersion}/data/${resourcePath}`,
       {
+        ...this.requestOptions,
         method: this.method,
         body: input ? JSON.stringify({ input }) : undefined,
       }
