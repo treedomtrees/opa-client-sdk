@@ -1,5 +1,5 @@
 export type OpaQueryInput = {
-  subject: {
+  subject?: {
     id: string | number
     type?: string
   }
@@ -7,6 +7,11 @@ export type OpaQueryInput = {
   resource?: {
     id: string | number
     type?: string
+  }
+
+  headers?: {
+    authorization?: string
+    [x: string]: string
   }
 
   [x: string]: unknown
