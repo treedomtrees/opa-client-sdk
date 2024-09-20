@@ -25,6 +25,7 @@ const opaClient = new OpenPolicyAgentClient({
   cache?: Cache // optional
   opaVersion?: string // defaults to 'v1'
   method?: 'POST' | 'GET' // defaults to 'POST'
+  requestOptions?: UndiciRequestOptions // among other things, allows setting a proxy
 })
 ```
 
